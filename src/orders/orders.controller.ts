@@ -1,7 +1,11 @@
-import { Controller, ParseIntPipe } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
+import {
+  ChangeOrderStatusDto,
+  CreateOrderDto,
+  OrderPaginationDto,
+} from './dto';
 
 @Controller()
 export class OrdersController {
@@ -13,21 +17,22 @@ export class OrdersController {
   }
 
   @MessagePattern('findAllOrders')
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Payload() orderPaginationDto: OrderPaginationDto) {
+    return this.ordersService.findAll(orderPaginationDto);
   }
 
   @MessagePattern('findOneOrder')
-  findOne(@Payload('id', ParseIntPipe) id: number) {
+  findOne(@Payload('id') id: string) {
     return this.ordersService.findOne(id);
   }
 
+  @MessagePattern('findAllOrdersByStatus')
+  findAllByStatus(@Payload() orderPaginationDto: OrderPaginationDto) {
+    return this.ordersService.findAll(orderPaginationDto);
+  }
+
   @MessagePattern('changeOrderStatus')
-  changeOrderStatus() {
-    // return this.ordersService.changeStatus();
-    throw new RpcException({
-      message: 'Error changing order status',
-      code: 500,
-    });
+  changeOrderStatus(@Payload() changeOrderStatusDto: ChangeOrderStatusDto) {
+    return this.ordersService.changeOrderStatus(changeOrderStatusDto);
   }
 }
